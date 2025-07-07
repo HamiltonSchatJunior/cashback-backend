@@ -1,0 +1,38 @@
+[
+  {
+    "nome": "Hamilton",
+    "email": "hamilton.schat@gmail.com",
+    "senha": "123",
+    "data_cadastro": "2025-07-07T13:41:36.352853"
+  },
+  {
+    "nome": "tio san",
+    "email": "tio@san",
+    "senha": "123",
+    "data_cadastro": "2025-07-07T13:47:12.481647"
+  },
+  {
+    "nome": "Hamilton",
+    "email": "hamilton@123",
+    "senha": "123",
+    "data_cadastro": "2025-07-07T14:01:21.806937",
+    "saldo": 0.0,
+    "cashback_total": 0.0
+  },
+  {
+    "nome": "Hamilton",
+    "email": "ham@1",
+    "senha": "123",
+    "data_cadastro": "2025-07-07T14:04:31.648065",
+    "saldo": 20.0,
+    "cashback_total": 0.0
+  },
+  {
+    "nome": "tio san",
+    "email": "tiosan@123",
+    "senha": "123",
+    "data_cadastro": "2025-07-07T17:31:22.995108",
+    "saldo": 0.0,
+    "cashback_total": 0.0
+  }
+]

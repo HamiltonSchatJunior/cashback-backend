@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel Admin - Cashback Fácil</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { color: #6a1b9a; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h2>Usuários Cadastrados</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Saldo (R$)</th>
+        <th>Total Cashback (R$)</th>
+        <th>Data Cadastro</th>
+      </tr>
+    </thead>
+    <tbody id="tabela-usuarios">
+      <tr><td colspan="5">Carregando...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    async function carregarUsuarios() {
+      try {
+        const res = await fetch('http://127.0.0.1:5000/admin/usuarios');
+        const usuarios = await res.json();
+
+        const tabela = document.getElementById('tabela-usuarios');
+        tabela.innerHTML = '';
+
+        usuarios.forEach(u => {
+          const linha = document.createElement('tr');
+          linha.innerHTML = `
+            <td>${u.nome}</td>
+            <td>${u.email}</td>
+            <td>R$ ${u.saldo?.toFixed(2) || '0.00'}</td>
+            <td>R$ ${u.cashback_total?.toFixed(2) || '0.00'}</td>
+            <td>${new Date(u.data_cadastro).toLocaleDateString()}</td>
+          `;
+          tabela.appendChild(linha);
+        });
+
+      } catch (err) {
+        alert('Erro ao carregar usuários.');
+        console.error(err);
+      }
+    }
+
+    carregarUsuarios();
+  </script>
+</body>
+</html>
