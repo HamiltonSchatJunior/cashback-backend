@@ -35,6 +35,8 @@ def cadastrar():
         "nome": data['nome'],
         "email": data['email'],
         "senha": data['senha'],
+        "cpf": data.get('cpf', ''),
+        "telefone": data.get('telefone', ''),
         "data_cadastro": datetime.now().isoformat(),
         "saldo": 0.0,
         "cashback_total": 0.0
@@ -68,7 +70,9 @@ def buscar_usuario():
                 "nome": u['nome'],
                 "email": u['email'],
                 "saldo": u.get('saldo', 0.0),
-                "cashback_total": u.get('cashback_total', 0.0)
+                "cashback_total": u.get('cashback_total', 0.0),
+                "cpf": u.get('cpf', ''),
+                "telefone": u.get('telefone', '')
             })
 
     return jsonify({"erro": "Usuário não encontrado."}), 404
@@ -104,7 +108,6 @@ def redirecionar():
 def listar_usuarios():
     usuarios = carregar_usuarios()
     return jsonify(usuarios)
-
 
 # Iniciar servidor
 if __name__ == '__main__':
