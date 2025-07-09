@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, CORS
 import json
 import os
 from datetime import datetime
 
 app = Flask(__name__)
+CORS(app)
 USERS_FILE = 'usuarios.json'
 
 @app.route('/admin')
