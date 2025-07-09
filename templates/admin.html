@@ -4,34 +4,64 @@
   <meta charset="UTF-8">
   <title>Painel Admin - Cashback Fácil</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    h2 { color: #6a1b9a; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #f0f0f0; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+
+    h2 {
+      color: #6a1b9a;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      background: #fff;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #eee;
+      color: #333;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f7f7f7;
+    }
   </style>
 </head>
 <body>
-  <h2>Usuários Cadastrados</h2>
+  <h2>Painel Administrativo - Usuários Cadastrados</h2>
+
   <table>
     <thead>
       <tr>
         <th>Nome</th>
         <th>Email</th>
+        <th>CPF</th>
+        <th>Telefone</th>
         <th>Saldo (R$)</th>
         <th>Total Cashback (R$)</th>
         <th>Data Cadastro</th>
       </tr>
     </thead>
     <tbody id="tabela-usuarios">
-      <tr><td colspan="5">Carregando...</td></tr>
+      <tr><td colspan="7">Carregando...</td></tr>
     </tbody>
   </table>
 
   <script>
     async function carregarUsuarios() {
       try {
-        const res = await fetch('http://127.0.0.1:5000/admin/usuarios');
+        const res = await fetch('https://cashback-backend-nkr1.onrender.com/admin/usuarios');
         const usuarios = await res.json();
 
         const tabela = document.getElementById('tabela-usuarios');
@@ -40,10 +70,12 @@
         usuarios.forEach(u => {
           const linha = document.createElement('tr');
           linha.innerHTML = `
-            <td>${u.nome}</td>
-            <td>${u.email}</td>
-            <td>R$ ${u.saldo?.toFixed(2) || '0.00'}</td>
-            <td>R$ ${u.cashback_total?.toFixed(2) || '0.00'}</td>
+            <td>${u.nome || ''}</td>
+            <td>${u.email || ''}</td>
+            <td>${u.cpf || '-'}</td>
+            <td>${u.telefone || '-'}</td>
+            <td>R$ ${(u.saldo || 0).toFixed(2)}</td>
+            <td>R$ ${(u.cashback_total || 0).toFixed(2)}</td>
             <td>${new Date(u.data_cadastro).toLocaleDateString()}</td>
           `;
           tabela.appendChild(linha);
