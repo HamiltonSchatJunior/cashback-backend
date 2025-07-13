@@ -3,47 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <title>Painel Admin - Cashback Fácil</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f9f9f9;
-    }
+  <link rel="stylesheet" href="admin.css">
 
-    h2 {
-      color: #6a1b9a;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 20px;
-      background: #fff;
-      box-shadow: 0 0 6px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #eee;
-      color: #333;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f7f7f7;
-    }
-  </style>
 </head>
 <body>
   <h2>Painel Administrativo - Usuários Cadastrados</h2>
+  <button id="btnNovoUsuario">+ Novo Usuário</button>
+
+  <!-- Menu flutuante CADASTRO -->
+  <div id="drawer">
+    <h3>Novo Usuário</h3>
+    <form id="form-novo-usuario">
+      <input type="text" id="novo-nome" placeholder="Nome" required>
+      <input type="email" id="novo-email" placeholder="Email" required>
+      <input type="password" id="nova-senha" placeholder="Senha" required>
+      <input type="text" id="novo-cpf" placeholder="CPF">
+      <input type="text" id="novo-telefone" placeholder="Telefone">
+      <button type="submit">Cadastrar</button>
+      <button type="button" onclick="fecharDrawer()">Fechar</button>
+    </form>
+    <div id="mensagem-cadastro"></div>
+  </div>
+
+  <!-- Menu flutuante EDIÇÃO -->
+  <div id="edit-drawer">
+    <h3>Editar Usuário</h3>
+    <form id="form-editar-usuario">
+      <input type="hidden" id="edit-id">
+      <input type="text" id="edit-nome" placeholder="Nome" required>
+      <input type="email" id="edit-email" placeholder="Email" required>
+      <input type="password" id="edit-senha" placeholder="Nova Senha (ou deixe vazio)">
+      <input type="text" id="edit-cpf" placeholder="CPF">
+      <input type="text" id="edit-telefone" placeholder="Telefone">
+      <button type="submit">Salvar Alterações</button>
+      <button type="button" onclick="fecharEditDrawer()">Fechar</button>
+    </form>
+    <div id="mensagem-edicao"></div>
+  </div>
 
   <table>
     <thead>
       <tr>
+        <th>ID</th>
         <th>Nome</th>
         <th>Email</th>
         <th>CPF</th>
@@ -51,17 +52,46 @@
         <th>Saldo (R$)</th>
         <th>Total Cashback (R$)</th>
         <th>Data Cadastro</th>
+        <th>Ações</th>
       </tr>
     </thead>
     <tbody id="tabela-usuarios">
-      <tr><td colspan="7">Carregando...</td></tr>
+      <tr><td colspan="9">Carregando...</td></tr>
     </tbody>
   </table>
 
   <script>
+    function abrirDrawer() {
+      document.getElementById('drawer').classList.add('open');
+    }
+
+    function fecharDrawer() {
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('form-novo-usuario').reset();
+      document.getElementById('mensagem-cadastro').textContent = '';
+    }
+
+    function abrirEditDrawer(usuario) {
+      document.getElementById('edit-id').value = usuario.id;
+      document.getElementById('edit-nome').value = usuario.nome;
+      document.getElementById('edit-email').value = usuario.email;
+      document.getElementById('edit-cpf').value = usuario.cpf || '';
+      document.getElementById('edit-telefone').value = usuario.telefone || '';
+      document.getElementById('edit-senha').value = '';
+      document.getElementById('mensagem-edicao').textContent = '';
+      document.getElementById('edit-drawer').classList.add('open');
+    }
+
+    function fecharEditDrawer() {
+      document.getElementById('edit-drawer').classList.remove('open');
+      document.getElementById('form-editar-usuario').reset();
+      document.getElementById('mensagem-edicao').textContent = '';
+    }
+
     async function carregarUsuarios() {
       try {
         const res = await fetch('https://cashback-backend-nkr1.onrender.com/admin/usuarios');
+
         const usuarios = await res.json();
 
         const tabela = document.getElementById('tabela-usuarios');
@@ -70,6 +100,7 @@
         usuarios.forEach(u => {
           const linha = document.createElement('tr');
           linha.innerHTML = `
+            <td>${u.id || '-'}</td>
             <td>${u.nome || ''}</td>
             <td>${u.email || ''}</td>
             <td>${u.cpf || '-'}</td>
@@ -77,7 +108,12 @@
             <td>R$ ${(u.saldo || 0).toFixed(2)}</td>
             <td>R$ ${(u.cashback_total || 0).toFixed(2)}</td>
             <td>${new Date(u.data_cadastro).toLocaleDateString()}</td>
+            <td><button class="btn-editar">✏️ Editar</button></td>
           `;
+
+          // adiciona listener no botão "Editar"
+          linha.querySelector('.btn-editar').addEventListener('click', () => abrirEditDrawer(u));
+
           tabela.appendChild(linha);
         });
 
@@ -86,6 +122,91 @@
         console.error(err);
       }
     }
+
+    document.getElementById('btnNovoUsuario').addEventListener('click', abrirDrawer);
+
+    document.getElementById('form-novo-usuario').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nome = document.getElementById('novo-nome').value.trim();
+      const email = document.getElementById('novo-email').value.trim();
+      const senha = document.getElementById('nova-senha').value.trim();
+      const cpf = document.getElementById('novo-cpf').value.trim();
+      const telefone = document.getElementById('novo-telefone').value.trim();
+      const msg = document.getElementById('mensagem-cadastro');
+
+      if (!nome || !email || !senha) {
+        msg.textContent = "Preencha nome, email e senha.";
+        msg.style.color = 'red';
+        return;
+      }
+
+      try {
+        const res = await fetch('https://cashback-backend-nkr1.onrender.com/cadastrar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, email, senha, cpf, telefone })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          msg.textContent = "Usuário cadastrado com sucesso!";
+          msg.style.color = 'green';
+          carregarUsuarios();
+          setTimeout(() => fecharDrawer(), 1000);
+        } else {
+          msg.textContent = data.erro || "Erro ao cadastrar.";
+          msg.style.color = 'red';
+        }
+
+      } catch (err) {
+        msg.textContent = "Erro de conexão com o servidor.";
+        msg.style.color = 'red';
+      }
+    });
+
+    document.getElementById('form-editar-usuario').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id = document.getElementById('edit-id').value;
+      const nome = document.getElementById('edit-nome').value.trim();
+      const email = document.getElementById('edit-email').value.trim();
+      const senha = document.getElementById('edit-senha').value.trim();
+      const cpf = document.getElementById('edit-cpf').value.trim();
+      const telefone = document.getElementById('edit-telefone').value.trim();
+      const msg = document.getElementById('mensagem-edicao');
+
+      if (!nome || !email) {
+        msg.textContent = "Preencha nome e email.";
+        msg.style.color = 'red';
+        return;
+      }
+
+      try {
+        const res = await fetch('https://cashback-backend-nkr1.onrender.com/editar_usuario', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, nome, email, senha, cpf, telefone })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          msg.textContent = "Alterações salvas com sucesso!";
+          msg.style.color = 'green';
+          carregarUsuarios();
+          setTimeout(() => fecharEditDrawer(), 1000);
+        } else {
+          msg.textContent = data.erro || "Erro ao salvar.";
+          msg.style.color = 'red';
+        }
+
+      } catch (err) {
+        msg.textContent = "Erro de conexão.";
+        msg.style.color = 'red';
+      }
+    });
 
     carregarUsuarios();
   </script>
